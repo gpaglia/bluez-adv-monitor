@@ -1,0 +1,39 @@
+// settings file for dbus-java-parent project
+
+pluginManagement {
+    this.apply from: './bluez-adv-monitor-platform/platform.gradle'
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        jcenter()
+    }
+
+    resolutionStrategy {
+    }
+
+    //noinspection GroovyAssignabilityCheck
+    plugins {
+        // semantic version
+        id 'io.wusa.semver-git-plugin' version "${mon__wusaSemverPluginVersion}"
+
+        // bnd / osgi
+        // not needed for now
+        // id 'biz.aQute.bnd.builder' version "${mon__bndPluginVersion}"
+
+        // disable for now
+        // id 'org.javamodularity.moduleplugin' version "${mon__modularityPluginVersion}"
+
+        // disable lombok
+        // id 'io.freefair.lombok' version "${mon__lombokPluginVersion}"
+
+        // disable modularity
+        // https://github.com/jjohannes/extra-java-module-info
+        // id "de.jjohannes.extra-java-module-info" version "${mon__extraModuleInfoPluginVersion}"
+    }
+
+}
+
+rootProject.name = 'bluez-adv-monitor-parent'
+
+include 'bluez-adv-monitor-platform',
+        'bluez-adv-monitor-java'

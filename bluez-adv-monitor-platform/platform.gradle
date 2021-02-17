@@ -1,0 +1,47 @@
+// Project plugins and dependencies versions
+// Updated Jan 29th, 2021 by gpaglia
+ext {
+    // plugins
+    // semantic version
+    mon__wusaSemverPluginVersion = '2.3.7'
+
+    // bnd / osgi
+    mon__bndPluginVersion = '5.2.0'
+
+    // disable for now
+    // mon__modularityPluginVersion = '1.7.0'
+    // mon__lombokPluginVersion = '5.3.0'
+    // mon__extraModuleInfoPluginVersion = '0.5'
+
+    // slf4j
+    mon__slf4jVersion = '1.7.30'
+
+    // logback
+    mon__logbackVersion = '1.2.3'
+
+    // junit5
+    mon__junitVersion = '5.7.0'
+
+    // hamcrest
+    mon__hamcrestVersion = '2.2'
+
+    // hamcrest-optional version
+    mon__hamcrestOptionalVersion = '2.0.0'
+
+    // the bluez-dbus dependency (forked)
+    mon__bluezDbusVersion = '3.3+'
+
+    /*
+    No longer needed with 3.3.0-SNAPSHOT
+    // https://mvnrepository.com/artifact/com.github.hypfvieh/java-utils
+    mon__hypfviehUtilsVersion = '1.0.6'
+     */
+
+    /*
+    Not needed here
+    // https://mvnrepository.com/artifact/com.github.jnr/jnr-unixsocket
+    mon__unixSocketVersion = '0.38.5'
+     */
+
+
+}

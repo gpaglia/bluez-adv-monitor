@@ -1,0 +1,132 @@
+
+plugins {
+    id 'io.wusa.semver-git-plugin'
+}
+
+description = 'Bluez dbus-based advertisement monitor [gradle, java 11, dbus-java] - Parent project'
+
+allprojects { Project prj ->
+    prj.group = 'com.gpaglia.bt'
+    prj.version = '0.1.0-SNAPSHOT'  // default if no semver
+    prj.getPlugins().withId('io.wusa.semver-git-plugin') {
+        //noinspection GroovyAssignabilityCheck
+        // version from git
+        prj.version = semver.info.toString()
+        prj.semver {
+            branches {
+                branch {
+                    regex = ".+"
+                    incrementer = "MINOR_INCREMENTER"
+                    formatter = {
+                        "${semver.info.version.major}.${semver.info.version.minor}.${semver.info.version.patch}+build.${semver.info.count}.sha.${semver.info.shortCommit}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+subprojects { Project subp ->
+    subp.getPlugins().withId('application') {
+        subp.application.getMainClass().set(project.hasProperty("mainClass") ? getProperty("mainClass") : "NULL")
+    }
+
+    subp.getPlugins().withId('java') {
+
+        // set java version and other standards for projects with java plugin installed
+        subp.java {
+            sourceCompatibility = JavaVersion.VERSION_11
+            targetCompatibility = JavaVersion.VERSION_11
+            if (! subp.getName().endsWith('osgi')) {
+                withJavadocJar()
+                withSourcesJar()
+                // modularity disanabled for now
+                // modularity.inferModulePath = true
+            }
+        }
+
+        /*
+        // modularity enabled
+        // define a java9 sourceSet
+        subp.sourceSets {
+            //noinspection GroovyAssignabilityCheck
+            main {
+                java {
+                    srcDir 'src/main/java9'
+                }
+            }
+        }
+         */
+
+        subp.tasks.withType(JavaCompile) {
+            options.encoding = 'UTF-8'
+            options.compilerArgs += [
+                    // jdk8 parameter names
+                    '-parameters',
+                    // '-proc:none',
+                    '-Xlint:deprecation'
+            ]
+
+            // modularity disabled, not working
+            // use the project's version or define one directly
+            // options.javaModuleVersion = provider { project.version }
+        }
+
+        subp.tasks.withType(Test) {
+            useJUnitPlatform {
+                // options here
+            }
+            testLogging.showStandardStreams = true
+            testLogging.exceptionFormat = 'full'
+        }
+
+        subp.tasks.withType(Javadoc) {
+            options.encoding = 'UTF-8'
+        }
+
+        subp.afterEvaluate { Project p ->
+            p.task(type: Jar, 'testJar') {
+                group = 'build'
+                archiveClassifier.set('tests')
+                from p.sourceSets.test.output
+            }
+
+            // publishing
+            p.publishing {
+                publications.create("publish-${p.name}", MavenPublication) {
+                    artifact jar
+                    if ((! p.getName().endsWith('-osgi')) && (p.getName().endsWith('-platform'))) {
+                        artifact sourcesJar
+                        artifact javadocJar
+                        artifact testJar
+                    }
+                }
+
+                repositories {
+                    mavenLocal()
+                }
+            }
+        }
+    }
+
+    /* modularity disabled, not working
+    subp.getPlugins().withId('java-test-fixtures') { it ->
+        subp.sourceSets {
+            //noinspection GroovyAssignabilityCheck
+            testFixtures {
+                java {
+                    srcDir 'src/main/java9'
+                }
+            }
+        }
+    }
+     */
+
+    // configure repositories
+    subp.repositories {
+        mavenLocal()
+        jcenter()
+    }
+
+}
+

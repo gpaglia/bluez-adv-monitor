@@ -1,0 +1,49 @@
+plugins {
+    id 'java-platform'
+    id 'io.wusa.semver-git-plugin'
+    id 'maven-publish'
+}
+
+description = 'bluez-based advertisement monitor [gradle, java 11, bluez-dbus] -- platform dependencies'
+
+apply from: './platform.gradle'
+
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    constraints {
+        // logging
+        api group: 'org.slf4j', name: 'slf4j-api', version: "${mon__slf4jVersion}"
+        runtime group: 'ch.qos.logback', name: 'logback-classic', version: "${mon__logbackVersion}"
+
+        // hamcrest
+        api group: 'org.hamcrest', name: 'hamcrest-core', version: "${mon__hamcrestVersion}"
+
+        // hamcrest-optional
+        api group: 'com.github.npathai', name: 'hamcrest-optional', version: "${mon__hamcrestOptionalVersion}"
+
+        // local fork of dbus-java
+        api group: 'com.gpaglia.dbus', name: 'dbus-java', version: "${mon__bluezDbusVersion}"
+
+    }
+    // junit5 BOM
+    api platform("org.junit:junit-bom:${mon__junitVersion}")
+
+
+}
+
+/*
+publishing {
+    publications {
+        //noinspection GroovyAssignabilityCheck
+        advMonitorPlatform(MavenPublication) {
+            from components.javaPlatform
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+ */
