@@ -316,7 +316,7 @@ def find_adapter(bus):
 
 def test(bus, mainloop, advmon_mgr, app_id):
     # Create an App instance.
-    print('Creating monitor app (and exposing it')
+    print('Creating monitor app (and exposing it)')
     app = AdvMonitorApp(bus, advmon_mgr, app_id)
 
     # GP -- start
