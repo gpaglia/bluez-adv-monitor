@@ -35,7 +35,8 @@ class AdvMonitor(dbus.service.Object):
     # Indexes of the Monitor object parameters in a monitor data list.
     MONITOR_TYPE = 0
     RSSI_FILTER = 1
-    PATTERNS = 2
+    SAMPL_PERIOD = 2
+    PATTERNS = 3
 
     # Indexes of the RSSI filter parameters in a monitor data list.
     RSSI_H_THRESH = 0
@@ -54,6 +55,7 @@ class AdvMonitor(dbus.service.Object):
 
         self._set_type(monitor_data[self.MONITOR_TYPE])
         self._set_rssi(monitor_data[self.RSSI_FILTER])
+        self._set_sampl_period(monitor_data[self.SAMPL_PERIOD])
         self._set_patterns(monitor_data[self.PATTERNS])
 
         super(AdvMonitor, self).__init__(self.bus, self.path)
@@ -71,6 +73,7 @@ class AdvMonitor(dbus.service.Object):
         properties['RSSIHighTimeout'] = dbus.UInt16(self.rssi[1])
         properties['RSSILowThreshold'] = dbus.Int16(self.rssi[2])
         properties['RSSILowTimeout'] = dbus.UInt16(self.rssi[3])
+        properties['RSSISamplingPeriod'] = dbus.UInt16(self.sampling_period)
         properties['Patterns'] = dbus.Array(self.patterns, signature='(yyay)')
         return {ADV_MONITOR_IFACE: properties}
 
@@ -78,6 +81,9 @@ class AdvMonitor(dbus.service.Object):
     def _set_type(self, monitor_type):
         self.monitor_type = monitor_type
 
+
+    def _set_sampl_period(self, sampl_period):
+        self.sampling_period = sampl_period
 
     def _set_rssi(self, rssi):
         h_thresh = dbus.Int16(rssi[self.RSSI_H_THRESH])
@@ -114,6 +120,17 @@ class AdvMonitor(dbus.service.Object):
             return {}
 
         return self.get_properties()[ADV_MONITOR_IFACE]
+
+    @dbus.service.method(DBUS_PROP_IFACE,
+                        in_signature='ss',
+                        out_signature='v')
+    def Get(self, interface, prop):
+        print('{}: {} Get {}'.format(self.path, interface, prop))
+        if interface != ADV_MONITOR_IFACE:
+            print('{}: Get: Invalid arg {}, {}'.format(self.path, interface, prop))
+            return None
+
+        return self.get_properties()[ADV_MONITOR_IFACE].get(prop)
 
 
     @dbus.service.method(ADV_MONITOR_IFACE,
@@ -248,6 +265,7 @@ class AdvMonitorApp(dbus.service.Object):
 
     @dbus.service.signal(DBUS_OM_IFACE, signature='oa{sa{sv}}')
     def InterfacesAdded(self, object_path, interfaces_and_properties):
+        print('{}: InterfacesAdded'.format(self.app_path))
         # Invoking this method emits the InterfacesAdded signal,
         # nothing needs to be done here.
         return
@@ -255,6 +273,7 @@ class AdvMonitorApp(dbus.service.Object):
 
     @dbus.service.signal(DBUS_OM_IFACE, signature='oas')
     def InterfacesRemoved(self, object_path, interfaces):
+        print('{}: InterfacesRemoved'.format(self.app_path))
         # Invoking this method emits the InterfacesRemoved signal,
         # nothing needs to be done here.
         return
@@ -314,12 +333,19 @@ def find_adapter(bus):
     return adapter, adapter_props
 
 
+def waitForEnter(str):
+    try:
+        input('Press "Enter" key to {}...\n'.format(str))
+    except SyntaxError:
+        pass
+
 def test(bus, mainloop, advmon_mgr, app_id):
     # Create an App instance.
     print('Creating monitor app (and exposing it)')
     app = AdvMonitorApp(bus, advmon_mgr, app_id)
 
-    # GP -- start
+    waitForEnter('proceed')
+
     print('Registering app')
     # Register the app root path to expose advertisement monitors.
     # Release() should get called on monitor0 - incorrect monitor type.
@@ -330,28 +356,34 @@ def test(bus, mainloop, advmon_mgr, app_id):
         mainloop.quit()
         exit(-1)
 
-    # GP -- end
-
+    waitForEnter('proceed')
 
     # Create two monitor objects before registering the app. No Activate() or
     # Release() should get called yet as the app is not registered.
     data0 = [
         'invalid_patterns',
         [-50, 1, -70, 1],
+        0,
         [[0, 0x03, [0x12, 0x18]]] # Service Class UUID is 0x1812 (HOG)
     ]
     data1 = [
         'or_patterns',
         [127, 0, 127, 0],
-        [[5, 0x09, [ord('_')]]] # 5th character of the Local Name is '_'
+        0,
+        # [[5, 0x09, [ord('_')]]] # 5th character of the Local Name is '_'
+        [[0x00, 0x09, [0x4d]]] # first character of local name is 'M'
     ]
 
-    print('Adding first monitor')
-    monitor0 = app.add_monitor(data0)
+    # print('Adding first monitor')
+    # monitor0 = app.add_monitor(data0)
+
+    # waitForEnter('proceed')
+
 
     print('Adding second monitor')
     monitor1 = app.add_monitor(data1)
 
+    waitForEnter('proceed')
 
     # Create two more monitor objects.
     # Release() should get called on monitor2 - incorrect RSSI Filter values.
@@ -359,11 +391,13 @@ def test(bus, mainloop, advmon_mgr, app_id):
     data2 = [
         'or_patterns',
         [-50, 1, -30, 1],
+        0,
         [[0, 0x19, [0xC2, 0x03]]] # Appearance is 0xC203 (Mouse)
     ]
     data3 = [
         'or_patterns',
         [-50, 1, -70, 1],
+        0,
         [[0, 0x03, [0x12, 0x18]], [0, 0x19, [0xC2, 0x03]]]
     ]
 
@@ -376,10 +410,8 @@ def test(bus, mainloop, advmon_mgr, app_id):
     # Run until user hits the 'Enter' key. If any peer device is advertising
     # during this time, DeviceFound() should get triggered for monitors
     # matching the advertisements.
-    try:
-        input('Press "Enter" key to quit...\n')
-    except SyntaxError:
-        pass
+
+    waitForEnter('quit')
 
     # Remove a monitor. DeviceFound() for this monitor should not get
     # triggered any more.
