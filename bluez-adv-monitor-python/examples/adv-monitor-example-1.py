@@ -368,7 +368,7 @@ def test(bus, mainloop, advmon_mgr, app_id):
     ]
     data1 = [
         'or_patterns',
-        [127, 0, 127, 0],
+        [-120, 25, -126, 60],
         0,
         # [[5, 0x09, [ord('_')]]] # 5th character of the Local Name is '_'
         [[0x00, 0x09, [0x4d]]] # first character of local name is 'M'
