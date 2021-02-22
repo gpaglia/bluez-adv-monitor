@@ -9,7 +9,7 @@ pluginManagement {
         // local repository accessible via http -- but local web server (nginx) must be started
         maven {
             url "http://LAPTOP-LIPPFH0T:1080/repository"
-            allowInsecureProtocol
+            allowInsecureProtocol true
         }
     }
 
