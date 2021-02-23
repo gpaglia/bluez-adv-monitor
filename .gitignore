@@ -5,6 +5,8 @@ target/
 .classpath
 .project
 
+# vscode java extension
+/bluez-*/bin/
 
 # Intellij
 .idea
