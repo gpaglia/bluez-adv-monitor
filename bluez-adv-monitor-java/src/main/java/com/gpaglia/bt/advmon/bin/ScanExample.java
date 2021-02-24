@@ -1,11 +1,14 @@
 package com.gpaglia.bt.advmon.bin;
 
+import org.bluez.Adapter1;
+import org.bluez.Device1;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.interfaces.ObjectManager;
+import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.DBusListType;
 import org.freedesktop.dbus.types.Variant;
 import org.slf4j.Logger;
@@ -37,31 +40,6 @@ public class ScanExample {
   private static final String SCAN_APP_BASE_PATH = "/org/bluez/example/scan_app/";
 
   private static final int CONNECTION_TIMEOUT = 5000; // in ms
-
-  @DBusInterfaceName("org.bluez.Adapter1")
-  public interface Adapter1 extends DBusInterface {
-    void StartDiscovery();
-    void StopDiscovery();
-    void RemoveDevice(DBusPath device);
-    void SetDiscoveryFilter(Map<String, Variant<?>> filter);
-  }
-
-  @DBusInterfaceName("org.bluez.Device1")
-  public interface  Device1 extends DBusInterface {
-    void Connect();
-    void Disconnect();
-    void Connectprofile(String uuid);
-    void DisconnectProfile(String uuid);
-    void Pair();
-    void CancelPairing();
-  }
-
-  @DBusInterfaceName("org.freedesktop.DBus.Properties")
-  public interface Properties extends DBusInterface {
-    Variant<?> Get(String ifName, String propName);
-    void Set(String ifName, String propName, Variant<?> value);
-    Map<String, Variant<?>> GetAll(String ifName);
-  }
 
   public static void main(String[] args) {
     final int appId = (args.length == 0 || !args[1].matches("[0-9]+")) ? 0 : Integer.parseInt(args[1]);
@@ -117,6 +95,13 @@ public class ScanExample {
         }
       }
 
+      LOGGER.info("Setting discovery filter for adapter {}", adapterPath);
+      final Map<String, Variant<?>> filter = Map.of(
+        "Pattern", new Variant<String>(ADDR),
+        "DuplicateData", new Variant<Boolean>(true)
+      );
+      adapter.SetDiscoveryFilter(filter);
+
       LOGGER.info("Starting discovery, then sleeping ... ");
       adapter.StartDiscovery();
       try {
@@ -157,6 +142,17 @@ public class ScanExample {
         }
       }
 
+      device.Connect();
+      LOGGER.info("Device {} connected, show (another time) objects and interfaces", devicePath.toString());
+
+      try {
+        Thread.sleep(200);
+      } catch(InterruptedException ignored) {
+        // no op
+      }
+
+      showObjectsAndInterfaces(om);
+
       LOGGER.info("Monitoring service data {} for device {}...", SERV_DATA_UUID, devicePath);
 
       for (int i = 0; i < 30; i++) {
@@ -191,6 +187,23 @@ public class ScanExample {
     } finally {
       // no op
     }
+  }
+
+  private static void showDeviceHierarchy(DBusConnection conn, DBusPath devicePath) throws DBusException {
+    LOGGER.info("Getting object manager for device {}", devicePath);
+    final ObjectManager dom = conn.getRemoteObject(
+      BLUEZ_SERVICE_NAME,
+      devicePath.toString(),
+      ObjectManager.class
+    );
+
+    if (dom == null) {
+      LOGGER.error("Device Object Manager is null!");
+      return;
+    }
+
+    LOGGER.info("Object hyerarchy for device {}:", devicePath.toString());
+    showObjectsAndInterfaces(dom);
   }
 
   private static DBusPath findDevice(final ObjectManager om, final String address) {
