@@ -25,7 +25,11 @@ dependencies {
         api group: 'com.github.npathai', name: 'hamcrest-optional', version: "${mon__hamcrestOptionalVersion}"
 
         // local fork of dbus-java
-        api group: 'com.gpaglia.dbus', name: 'dbus-java', version: "${mon__bluezDbusVersion}"
+        api group: 'com.gpaglia.dbus', name: 'dbus-java', version: "${mon__dbusJavaVersion}"
+        // api group: 'com.gpaglia.dbus', name: 'dbus-java', version: "${xxx}"
+
+        // local fork of bluez-dbus
+        api group: 'com.gpaglia.bluez', name: 'bluez-dbus', version: "${mon__bluezDbusVersion}"
 
     }
     // junit5 BOM

@@ -18,8 +18,12 @@ dependencies {
   // slf4j
   api group: 'org.slf4j', name: 'slf4j-api'
 
+  // bluez-dbus
+  implementation group: 'com.gpaglia.bluez', name: 'bluez-dbus'
+
   // dbus-java
   implementation group: 'com.gpaglia.dbus', name: 'dbus-java'
+
 
   // logback
   runtimeOnly group: 'ch.qos.logback', name: 'logback-classic'

@@ -29,7 +29,11 @@ ext {
     mon__hamcrestOptionalVersion = '2.0.0'
 
     // the bluez-dbus dependency (forked)
-    mon__bluezDbusVersion = '3.3.0-SNAPSHOT.GP.1'
+    mon__dbusJavaVersion = '3.3.0-SNAPSHOT.GP.1'
+    xxx = '3.3.0-SNAPSHOT.GP.1'
+
+    // the bluez-dbus dependency (forked)
+    mon__bluezDbusVersion = '0.1.4-SNAPSHOT.GP.1'
 
     /*
     No longer needed with 3.3.0-SNAPSHOT
