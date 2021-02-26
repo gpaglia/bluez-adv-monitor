@@ -25,3 +25,33 @@ Most probably the original [bluez-dbus](https://github.com/hypfvieh/bluez-dbus)
 This is needed to run some simple example while I experiment before 
   translating the code to java.
 
+## Bluez/Dbus
+
+The following list of bluez dbus errors was added to dbus-java local fork in release 3.3.0-SNAPSHOT.GP.2
+* org.bluez.Error.AlreadyConnected
+* org.bluez.Error.AlreadyExists
+* org.bluez.Error.AuthenticationCanceled
+* org.bluez.Error.AuthenticationFailed
+* org.bluez.Error.AuthenticationRejected
+* org.bluez.Error.AuthenticationTimeout
+* org.bluez.Error.Canceled
+* org.bluez.Error.ConnectionAttemptFailed
+* org.bluez.Error.DoesNotExist
+* org.bluez.Error.Failed
+* org.bluez.Error.HealthError
+* org.bluez.Error.InProgress
+* org.bluez.Error.InvalidArguments
+* org.bluez.Error.InvalidLength
+* org.bluez.Error.InvalidOffset
+* org.bluez.Error.InvalidValueLength
+* org.bluez.Error.NotAcquired
+* org.bluez.Error.NotAllowed
+* org.bluez.Error.NotAuthorized
+* org.bluez.Error.NotAvailable
+* org.bluez.Error.NotConnected
+* org.bluez.Error.NotFound
+* org.bluez.Error.NotPermitted
+* org.bluez.Error.NotReady
+* org.bluez.Error.NotSupported
+* org.bluez.Error.OutOfRange
+* org.bluez.Error.Rejected

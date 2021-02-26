@@ -6,8 +6,10 @@ import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.handlers.AbstractInterfacesAddedHandler;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.interfaces.ObjectManager;
+import org.freedesktop.dbus.interfaces.ObjectManager.InterfacesAdded;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.DBusListType;
 import org.freedesktop.dbus.types.Variant;
@@ -36,7 +38,6 @@ public class ScanExample {
   private static final String BLUEZ_ADAPTER_IF = BLUEZ_SERVICE_NAME + ".Adapter1";
   private static final String BLUEZ_DEVICE_IF = BLUEZ_SERVICE_NAME + ".Device1";
 
-
   private static final String SCAN_APP_BASE_PATH = "/org/bluez/example/scan_app/";
 
   private static final int CONNECTION_TIMEOUT = 5000; // in ms
@@ -45,13 +46,9 @@ public class ScanExample {
     final int appId = (args.length == 0 || !args[1].matches("[0-9]+")) ? 0 : Integer.parseInt(args[1]);
     final String appPath = SCAN_APP_BASE_PATH + appId;
 
-
-    //noinspection EmptyFinallyBlock
-    try (DBusConnection conn = DBusConnection.getConnection(
-        DBusConnection.DBusBusType.SYSTEM,
-        false,
-        CONNECTION_TIMEOUT)
-    ) {
+    // noinspection EmptyFinallyBlock
+    try (DBusConnection conn = DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM, false,
+        CONNECTION_TIMEOUT)) {
       LOGGER.info("Starting with uniqueName={}, appId={}, appTaht={}\n", conn.getUniqueName(), appId, appPath);
 
       ObjectManager om = conn.getRemoteObject(BLUEZ_SERVICE_NAME, "/", ObjectManager.class);
@@ -68,11 +65,7 @@ public class ScanExample {
         System.exit(1);
       }
 
-      final Adapter1 adapter = conn.getRemoteObject(
-          BLUEZ_SERVICE_NAME,
-          adapterPath.toString(),
-          Adapter1.class
-      );
+      final Adapter1 adapter = conn.getRemoteObject(BLUEZ_SERVICE_NAME, adapterPath.toString(), Adapter1.class);
 
       if (adapter == null) {
         LOGGER.error("Could not find any Adapter1 on path {}", adapterPath.toString());
@@ -81,11 +74,8 @@ public class ScanExample {
 
       LOGGER.info("Getting properties for adapter {}", adapterPath.toString());
 
-      final Properties adapterPropsObj = conn.getRemoteObject(
-        BLUEZ_SERVICE_NAME,
-        adapterPath.toString(),
-        Properties.class
-      );
+      final Properties adapterPropsObj = conn.getRemoteObject(BLUEZ_SERVICE_NAME, adapterPath.toString(),
+          Properties.class);
 
       final Map<String, Variant<?>> adapterProps = adapterPropsObj.GetAll("org.bluez.Adapter1");
       if (adapterProps != null) {
@@ -96,11 +86,19 @@ public class ScanExample {
       }
 
       LOGGER.info("Setting discovery filter for adapter {}", adapterPath);
-      final Map<String, Variant<?>> filter = Map.of(
-        "Pattern", new Variant<String>(ADDR),
-        "DuplicateData", new Variant<Boolean>(true)
-      );
+      final Map<String, Variant<?>> filter = Map.of("Pattern", new Variant<String>(ADDR), "DuplicateData",
+          new Variant<Boolean>(true));
       adapter.SetDiscoveryFilter(filter);
+
+      LOGGER.info("Setting interface added callback");
+      conn.addSigHandler(ObjectManager.InterfacesAdded.class, new AbstractInterfacesAddedHandler() {
+        final Logger logger = LoggerFactory.getLogger(AbstractInterfacesAddedHandler.class);
+        @Override
+        public void handle(InterfacesAdded s) {
+          logger.info("\n *** Object path {}, path {}, Interfaces added {}\n", s.getObjectPath(), s.getPath(), s.getInterfaces().keySet().toString());
+        }
+        
+      });
 
       LOGGER.info("Starting discovery, then sleeping ... ");
       adapter.StartDiscovery();
@@ -142,17 +140,19 @@ public class ScanExample {
         }
       }
 
+      LOGGER.info("About to connect...");
       device.Connect();
       LOGGER.info("Device {} connected, show (another time) objects and interfaces", devicePath.toString());
 
       try {
-        Thread.sleep(200);
+        Thread.sleep(1300);
       } catch(InterruptedException ignored) {
         // no op
       }
 
       showObjectsAndInterfaces(om);
 
+      /*
       LOGGER.info("Monitoring service data {} for device {}...", SERV_DATA_UUID, devicePath);
 
       for (int i = 0; i < 30; i++) {
@@ -177,6 +177,7 @@ public class ScanExample {
           }
         }
       }
+      */
 
       conn.close();
 
@@ -184,6 +185,8 @@ public class ScanExample {
 
     } catch (DBusException de) {
       LOGGER.error("Got DBusException", de);
+    } catch (Exception e2) {
+      LOGGER.error("Got  Generic Exception", e2);
     } finally {
       // no op
     }
