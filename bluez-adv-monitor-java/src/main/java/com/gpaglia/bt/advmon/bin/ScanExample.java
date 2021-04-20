@@ -95,7 +95,12 @@ public class ScanExample {
         final Logger logger = LoggerFactory.getLogger(AbstractInterfacesAddedHandler.class);
         @Override
         public void handle(InterfacesAdded s) {
-          logger.info("\n *** Object path {}, path {}, Interfaces added {}\n", s.getObjectPath(), s.getPath(), s.getInterfaces().keySet().toString());
+          logger.info(
+            "\n *** Source {}, path {}, Interfaces added {}\n", 
+            s.getSignalSource().toString(),
+            s.getObjectPath(), 
+            s.getInterfaces().keySet().toString()
+          );
         }
         
       });

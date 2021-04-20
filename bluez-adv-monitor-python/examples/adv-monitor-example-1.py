@@ -69,11 +69,11 @@ class AdvMonitor(dbus.service.Object):
         properties = dict()
         properties['Type'] = dbus.String(self.monitor_type)
         # properties['RSSIThresholdsAndTimers'] = dbus.Struct(self.rssi, signature='nqnq')
-        properties['RSSIHighThreshold'] = dbus.Int16(self.rssi[0])
-        properties['RSSIHighTimeout'] = dbus.UInt16(self.rssi[1])
-        properties['RSSILowThreshold'] = dbus.Int16(self.rssi[2])
-        properties['RSSILowTimeout'] = dbus.UInt16(self.rssi[3])
-        properties['RSSISamplingPeriod'] = dbus.UInt16(self.sampling_period)
+        # properties['RSSIHighThreshold'] = dbus.Int16(self.rssi[0])
+        # properties['RSSIHighTimeout'] = dbus.UInt16(self.rssi[1])
+        # properties['RSSILowThreshold'] = dbus.Int16(self.rssi[2])
+        # properties['RSSILowTimeout'] = dbus.UInt16(self.rssi[3])
+        # properties['RSSISamplingPeriod'] = dbus.UInt16(self.sampling_period)
         properties['Patterns'] = dbus.Array(self.patterns, signature='(yyay)')
         return {ADV_MONITOR_IFACE: properties}
 
@@ -368,10 +368,13 @@ def test(bus, mainloop, advmon_mgr, app_id):
     ]
     data1 = [
         'or_patterns',
-        [-120, 25, -126, 60],
-        0,
+        # [-120, 25, -126, 60],
+        [127, 0, 127, 0],
+        256,
         # [[5, 0x09, [ord('_')]]] # 5th character of the Local Name is '_'
-        [[0x00, 0x09, [0x4d]]] # first character of local name is 'M'
+        #[[0x00, 0x09, [0x4d]]] # first character of local name is 'M'
+        #[[0x00, 0x16, [0x95, 0xfe]]] # 16-bit service UUID is 0x95fe (Xiaomi)
+        [[0x00, 0x01, [0x06]]] # flags is 0x06
     ]
 
     # print('Adding first monitor')
