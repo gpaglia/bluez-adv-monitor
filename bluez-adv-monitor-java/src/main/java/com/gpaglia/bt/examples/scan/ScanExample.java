@@ -1,4 +1,4 @@
-package com.gpaglia.bt.advmon.bin;
+package com.gpaglia.bt.examples.scan;
 
 import org.bluez.Adapter1;
 import org.bluez.Device1;

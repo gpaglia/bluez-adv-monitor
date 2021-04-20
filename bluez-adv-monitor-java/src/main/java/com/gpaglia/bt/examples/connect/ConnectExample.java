@@ -1,4 +1,4 @@
-package com.gpaglia.bt.advmon.bin;
+package com.gpaglia.bt.examples.connect;
 
 import java.util.Arrays;
 import java.util.List;
