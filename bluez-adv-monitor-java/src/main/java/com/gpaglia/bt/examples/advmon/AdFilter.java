@@ -2,9 +2,17 @@ package com.gpaglia.bt.examples.advmon;
 
 import java.util.Arrays;
 
-public class AdFilter {
+import org.freedesktop.dbus.Struct;
+import org.freedesktop.dbus.annotations.Position;
+
+public class AdFilter extends Struct {
+  @Position(0)
   private final byte position;
+
+  @Position(1)
   private final byte adType;
+
+  @Position(2)
   private final byte[] adData;
 
   public AdFilter(byte position, byte adType, byte[] adData) {

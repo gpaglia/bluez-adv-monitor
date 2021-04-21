@@ -2,6 +2,7 @@ package com.gpaglia.bt.examples.advmon;
 
 import static com.gpaglia.bt.examples.advmon.Commons.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +31,20 @@ public class Monitor implements AdvertisementMonitor1, Properties {
     this.connection = connection;
     this.objectPath = new DBusPath(objectPath);
     this.properties = new HashMap<>();
-    this.properties.put("Type", new Variant<String>("or_patterns"));
-    for (AdFilter filter: filters) {
-      this.properties.put("Patterns", new Variant<>(List.of(filter.getPosition(), filter.getAdType(), filter.getAdData()), "yyay"));
+    this.properties.put("Type", new Variant<String>("or_patterns", "s"));
+    this.properties.put("Patterns", new Variant<>(filters, "a(yyay)"));
+    /*
+    final List<Variant<?>> v = new ArrayList<>();
+    final Object[] o = new Object[filters.size()];
+    // for (AdFilter filter: filters) {
+    for (int i = 0; i < filters.size(); i++) {
+      // this.properties.put("Patterns", new Variant<>(List.of(filter.getPosition(), filter.getAdType(), filter.getAdData()), "yyay"));
+      // v.add(new Variant<>(filter, "(yyay)"));
+      o[i] = new Variant<AdFilter>(filters.get(i), "(yyay)");
     }
+    this.properties.put("Patterns", new Variant<>(o, "a(yyay)"));
+    */
+    LOGGER.info("Monitor {}, created properties with {} filters", objectPath, filters.size());
   }
 
   // local public methods
@@ -50,16 +61,24 @@ public class Monitor implements AdvertisementMonitor1, Properties {
   @Override
   @SuppressWarnings("unchecked")
   public <A> A Get(String interfaceName, String propertyName) {
+    LOGGER.info("Get called on {} for interface {} and property {}", objectPath.getPath(), interfaceName, propertyName);
     if (interfaceName.equals(ADV_MONITOR_IFACE) && properties.containsKey(propertyName)) {
       return  (A) properties.get(propertyName);
     } else {
-      throw new DBusExecutionException("Invalid interface or unknown property " + interfaceName + ":" + propertyName);
+      throw new DBusExecutionException("Get - Invalid interface or unknown property " + interfaceName + ":" + propertyName);
     }
   }
 
   @Override
   public Map<String, Variant<?>> GetAll(String interfaceName) {
-    return Collections.unmodifiableMap(properties);
+    LOGGER.info("GetAll called on {} for interface {}", objectPath.getPath(), interfaceName);
+    if (interfaceName.equals(ADV_MONITOR_IFACE)) {
+      final Map<String, Variant<?>> result = new HashMap<>(properties);
+      LOGGER.info("GetAll: returning {}", result);
+      return result;
+    } else {
+      throw new DBusExecutionException("GetAll-  Invalid interface " + interfaceName);
+    }
   }
 
   @Override

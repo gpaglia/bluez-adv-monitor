@@ -37,10 +37,10 @@ public class MonitorApp implements ObjectManager, DBusInterface {
   private ObjectManager om;
 
   private Map<String, Monitor> monitors = new HashMap<>();
-  private int lastMonitorId = -1;
+  private int lastMonitorId = 0;
 
   public static void main(String[] args) {
-    final MonitorApp app = new MonitorApp((args.length == 0 || !args[1].matches("[0-9]+")) ? 0 : Integer.valueOf(args[1]));
+    final MonitorApp app = new MonitorApp((args.length == 0 || !args[1].matches("[1-9]+")) ? 1 : Integer.valueOf(args[1]));
   }
 
   private MonitorApp(final int appId) {
@@ -136,6 +136,8 @@ public class MonitorApp implements ObjectManager, DBusInterface {
   public Map<DBusPath, Map<String, Map<String, Variant<?>>>> GetManagedObjects() {
     final Map<DBusPath, Map<String, Map<String, Variant<?>>>> result = new HashMap<>();
 
+    LOGGER.info("GetManagedObjects called on {}", appPath.getPath());
+
     for (Monitor m : monitors.values()) {
       result.put(m.getDBusPath(), Map.of(ADV_MONITOR_IFACE, m.GetAll(ADV_MONITOR_IFACE)));
     }
@@ -165,6 +167,7 @@ public class MonitorApp implements ObjectManager, DBusInterface {
       new ObjectManager.InterfacesAdded(
         this.getObjectPath(), 
         monitor.getDBusPath(), 
+
         Map.of(ADV_MONITOR_IFACE, monitor.GetAll(ADV_MONITOR_IFACE))
       )
     );

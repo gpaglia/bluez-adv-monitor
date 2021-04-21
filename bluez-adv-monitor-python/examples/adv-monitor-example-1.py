@@ -68,11 +68,11 @@ class AdvMonitor(dbus.service.Object):
     def get_properties(self):
         properties = dict()
         properties['Type'] = dbus.String(self.monitor_type)
-        # properties['RSSIThresholdsAndTimers'] = dbus.Struct(self.rssi, signature='nqnq')
-        # properties['RSSIHighThreshold'] = dbus.Int16(self.rssi[0])
-        # properties['RSSIHighTimeout'] = dbus.UInt16(self.rssi[1])
-        # properties['RSSILowThreshold'] = dbus.Int16(self.rssi[2])
-        # properties['RSSILowTimeout'] = dbus.UInt16(self.rssi[3])
+        #properties['RSSIThresholdsAndTimers'] = dbus.Struct(self.rssi, signature='nqnq')
+        #properties['RSSIHighThreshold'] = dbus.Int16(self.rssi[0])
+        #properties['RSSIHighTimeout'] = dbus.UInt16(self.rssi[1])
+        #properties['RSSILowThreshold'] = dbus.Int16(self.rssi[2])
+        #properties['RSSILowTimeout'] = dbus.UInt16(self.rssi[3])
         # properties['RSSISamplingPeriod'] = dbus.UInt16(self.sampling_period)
         properties['Patterns'] = dbus.Array(self.patterns, signature='(yyay)')
         return {ADV_MONITOR_IFACE: properties}
@@ -297,9 +297,11 @@ def read_adapter_supported_monitor_features(adapter_props):
 
 def print_supported_types_and_features(adapter_props):
     supported_types = read_adapter_supported_monitor_types(adapter_props)
+    print('Adapter props: ')
     for supported_type in supported_types:
         print(supported_type)
 
+    print('Adapter feaures: ')
     supported_features = read_adapter_supported_monitor_features(adapter_props)
     for supported_feature in supported_features:
         print(supported_feature)
@@ -344,7 +346,8 @@ def test(bus, mainloop, advmon_mgr, app_id):
     print('Creating monitor app (and exposing it)')
     app = AdvMonitorApp(bus, advmon_mgr, app_id)
 
-    waitForEnter('proceed')
+    print('Created AdvMonitor App ', app)
+    waitForEnter('proceed to registration')
 
     print('Registering app')
     # Register the app root path to expose advertisement monitors.
@@ -356,7 +359,7 @@ def test(bus, mainloop, advmon_mgr, app_id):
         mainloop.quit()
         exit(-1)
 
-    waitForEnter('proceed')
+    waitForEnter('proceed to creation of monitor')
 
     # Create two monitor objects before registering the app. No Activate() or
     # Release() should get called yet as the app is not registered.
@@ -383,10 +386,10 @@ def test(bus, mainloop, advmon_mgr, app_id):
     # waitForEnter('proceed')
 
 
-    print('Adding second monitor')
+    print('Adding monitor')
     monitor1 = app.add_monitor(data1)
 
-    waitForEnter('proceed')
+    # waitForEnter('proceed')
 
     # Create two more monitor objects.
     # Release() should get called on monitor2 - incorrect RSSI Filter values.
@@ -445,12 +448,17 @@ def main(app_id):
         print('Bluetooth adapter not found.')
         exit(-1)
 
+    print('Found adapter: ', adapter)
+
     # Read supported types and find AdvertisementMonitorManager1 interface.
     print_supported_types_and_features(adapter_props)
+
     advmon_mgr = find_advmon_mgr(bus, adapter)
     if not advmon_mgr :
         print('AdvertisementMonitorManager1 interface not found.')
         exit(-1)
+
+    print('Found AdvMonMgr: ', advmon_mgr)
 
     Thread(target=test, args=(bus, mainloop, advmon_mgr, app_id)).start()
 

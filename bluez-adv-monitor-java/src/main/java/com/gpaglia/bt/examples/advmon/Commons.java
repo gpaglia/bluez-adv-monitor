@@ -11,11 +11,11 @@ public interface Commons {
 
   String ADV_MONITOR_MANAGER_IFACE = "org.bluez.AdvertisementMonitorManager1";
   String ADV_MONITOR_IFACE = "org.bluez.AdvertisementMonitor1";
-  String ADV_MONITOR_APP_BASE_PATH = "/org/bluez/example/adv_monitor_app";
+  String ADV_MONITOR_APP_BASE_PATH = "/org/bluez/example/Adv_monitor_app";
 
   static String appPath(final int appId) { return ADV_MONITOR_APP_BASE_PATH + appId; }
 
-  static String monitorPath(final int appId, final int monId) { return appPath(appId) + "/" + monId; }
+  static String monitorPath(final int appId, final int monId) { return appPath(appId) + "/Monitor" + monId; }
 
   @DBusInterfaceName(ADV_MONITOR_IFACE)
   public interface AdvertisementMonitor1 extends  DBusInterface {
