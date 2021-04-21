@@ -32,7 +32,7 @@ public class Monitor implements AdvertisementMonitor1, Properties {
     this.properties = new HashMap<>();
     this.properties.put("Type", new Variant<String>("or_patterns"));
     for (AdFilter filter: filters) {
-      this.properties.put("Patterns", new Variant<List<Object>>(List.of(filter.getPosition(), filter.getAdType(), filter.getAdData())));
+      this.properties.put("Patterns", new Variant<>(List.of(filter.getPosition(), filter.getAdType(), filter.getAdData()), "yyay"));
     }
   }
 

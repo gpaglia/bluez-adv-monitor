@@ -1,10 +1,13 @@
 package com.gpaglia.bt.examples.advmon;
 
+import org.freedesktop.dbus.DBusMatchRule;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
+import org.freedesktop.dbus.interfaces.DBusSigHandler;
 import org.freedesktop.dbus.interfaces.ObjectManager;
+import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import static com.gpaglia.bt.examples.advmon.Commons.*;
 
@@ -46,11 +50,20 @@ public class MonitorApp implements ObjectManager, DBusInterface {
     try {
       LOGGER.info("Starting with appPaht={}\n", appPath);
       
-      this.connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM, false, CONNECTION_TIMEOUT);
+      connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM, false, CONNECTION_TIMEOUT);
 
       LOGGER.info("Connected to dbus with uniqueName={}", connection.getUniqueName());
 
-      this.om = connection.getRemoteObject(BLUEZ_SERVICE_NAME, "/", ObjectManager.class);
+      connection.addSigHandler(new DBusMatchRule((String) null, ADV_MONITOR_MANAGER_IFACE, null), new DBusSigHandler<>() {
+
+        @Override
+        public void handle(DBusSignal s) {
+          LOGGER.info("Got signal {}", s);
+        }
+        
+      });
+
+      om = connection.getRemoteObject(BLUEZ_SERVICE_NAME, "/", ObjectManager.class);
       if (om == null) {
         LOGGER.error("Could not get a reference to ObjectManager for service {} in path /", BLUEZ_SERVICE_NAME);
         System.exit(1);
@@ -83,19 +96,28 @@ public class MonitorApp implements ObjectManager, DBusInterface {
 
       LOGGER.info("Application {} registered with AdvertisementMonitorManager1", appPath);
 
+      final String monitorPath = addMonitor();
+      LOGGER.info("Created monitor {}", monitorPath);
 
-      try {
-        Thread.sleep(2000);        
-      } catch (InterruptedException ie) {
-        //
+      try(Scanner in = new Scanner(System.in)) {
+        System.out.print("Press <RET> to end program ... ");
+        in.nextLine();
+      } finally {
+        // nop
       }
+
+      mgr.UnregisterMonitor(this.appPath);
+      LOGGER.info("Application {} unregistered with AdvertisementMonitorManager1", appPath);
+
+      connection.unExportObject(appPath.getPath());
+      LOGGER.info("Application {} unexported", appPath);
 
     } catch (DBusException de) {
       LOGGER.error("Got DBusException", de);
       System.exit(1);
     } finally {
       if (connection != null && connection.isConnected()) {
-        connection.close();
+        connection.disconnect();
       }
     }
   }
