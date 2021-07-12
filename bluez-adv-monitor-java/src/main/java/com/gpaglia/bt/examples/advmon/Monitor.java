@@ -2,8 +2,6 @@ package com.gpaglia.bt.examples.advmon;
 
 import static com.gpaglia.bt.examples.advmon.Commons.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +11,7 @@ import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.interfaces.Properties;
+import org.freedesktop.dbus.types.UInt16;
 import org.freedesktop.dbus.types.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,13 @@ public class Monitor implements AdvertisementMonitor1, Properties {
     this.objectPath = new DBusPath(objectPath);
     this.properties = new HashMap<>();
     this.properties.put("Type", new Variant<String>("or_patterns", "s"));
+    /*
+    this.properties.put("RSSILowThreshold", new Variant<Integer>(127, "n"));
+    this.properties.put("RSSIHighThreshold", new Variant<Integer>(127, "n"));
+    this.properties.put("RSSILowTimeout", new Variant<UInt16>(new UInt16(0), "q"));
+    this.properties.put("RSSIHighTimeout", new Variant<UInt16>(new UInt16(0), "q"));
+    this.properties.put("RSSISamplingPeriod", new Variant<UInt16>(new UInt16(0), "q"));
+    */
     this.properties.put("Patterns", new Variant<>(filters, "a(yyay)"));
     /*
     final List<Variant<?>> v = new ArrayList<>();

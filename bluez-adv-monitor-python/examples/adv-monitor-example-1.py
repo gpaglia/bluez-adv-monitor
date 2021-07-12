@@ -374,7 +374,7 @@ def test(bus, mainloop, advmon_mgr, app_id):
         'or_patterns',
         # [-120, 25, -126, 60],
         [127, 0, 127, 0],
-        256,
+        0, #was 256
         # [[5, 0x09, [ord('_')]]] # 5th character of the Local Name is '_'
         #[[0x00, 0x09, [0x4d]]] # first character of local name is 'M'
         #[[0x00, 0x16, [0x95, 0xfe]]] # 16-bit service UUID is 0x95fe (Xiaomi)
