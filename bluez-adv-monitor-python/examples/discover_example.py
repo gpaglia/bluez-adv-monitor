@@ -12,6 +12,10 @@ except ImportError:
   import gobject as GObject
 import bluezutils
 
+import sys
+if sys.version_info[0] >= 3:
+		unicode = str
+
 compact = False
 devices = {}
 

@@ -10,6 +10,7 @@ import time
 
 from threading import Thread
 
+
 try:
     from gi.repository import GObject  # python3
 except ImportError:
@@ -377,7 +378,7 @@ def test(bus, mainloop, advmon_mgr, app_id):
         # [[5, 0x09, [ord('_')]]] # 5th character of the Local Name is '_'
         #[[0x00, 0x09, [0x4d]]] # first character of local name is 'M'
         #[[0x00, 0x16, [0x95, 0xfe]]] # 16-bit service UUID is 0x95fe (Xiaomi)
-        [[0x00, 0x01, [0x06]]] # flags is 0x06
+        [[0x00, 0x16, [0x95, 0xfe]]] # flags is 0x06
     ]
 
     # print('Adding first monitor')
